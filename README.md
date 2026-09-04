@@ -1,77 +1,84 @@
-# Student Library Management System
+# 📚 Student Library Management System
 
-A complete web-based **Student Library Management System** developed using **Python, Flask, SQLite, HTML, CSS, and JavaScript**.
+A full-stack **Student Library Management System** developed using **Python, Flask, SQLite, HTML, CSS, and Jinja2**.
 
-The system provides separate **Admin** and **Student** interfaces for managing students, books, physical book copies, borrowing, QR-based returns, reservations, lost books, fines, email notifications, and reports.
+The system provides separate **Admin** and **Student** portals to manage students, books, physical book copies, borrowing and returns, reservations, lost books, fines, reports, and email notifications.
 
-The project is designed to maintain individual physical copies of books and keep book availability synchronized with borrowing, returning, reservation, and lost-book operations.
+The application also supports **QR-code-based book return verification**, automated due-date and overdue email reminders, reservation notifications, and CSV report generation using Pandas.
 
 ---
 
-## Features
+## ✨ Key Features
 
-### Admin Module
+### 👨‍💼 Admin Module
 
-Administrators can:
+The Admin portal provides complete control over library operations.
 
-- Login through the Admin portal
-- Manage student records
+- Secure Admin login
+- Admin dashboard
 - Add new students
 - Edit student information
-- Activate or deactivate student accounts
-- Configure individual student borrow limits
-- Delete eligible student records
 - Search students
-- Manage library books
-- Add books and physical copies
+- Delete students
+- Activate or deactivate student accounts
+- Configure student borrowing limits
+- Add new books
 - Edit book details
-- Delete eligible books
 - Search books
+- Delete books
+- Manage multiple physical copies of a book
+- Track available copies
 - Issue books to students
 - View currently borrowed books
-- Return books using QR-code verification
+- View returned-book history
+- Verify book returns using QR codes
 - Mark borrowed books as lost
-- View returned book history
+- Calculate lost-book charges
 - Manage student reservations
-- View lost-book records
-- View system reports
+- View library reports
 - Export transaction reports as CSV
 - Export reservation reports as CSV
 
 ---
 
-### Student Module
+### 🎓 Student Module
 
-Students can:
+Students have a separate portal for accessing their library account.
 
-- Login using their student account
-- View their dashboard
-- View personal profile information
-- Change their password
+- Secure Student login
+- Student dashboard
+- View student information
+- View complete profile
+- Change account password
 - Browse library books
 - Check book availability
+- View currently borrowed books
+- View returned-book history
+- View lost-book records
 - Reserve unavailable books
 - View reservation status
-- Cancel reservations
-- View currently borrowed books
-- View returned and lost-book history
-- View due dates and fines
+- Cancel active reservations
+- Receive library email notifications
 
 ---
 
-## Book Copy Management
+## 📖 Book & Physical Copy Management
 
-The system manages every physical book copy separately.
+The system tracks both the main book record and individual physical copies.
 
 For example:
 
 ```text
-BOOK1003
-├── BOOK1003-C01
-└── BOOK1003-C02
+Book Code: BOOK1003
+Title: SQL
+Total Copies: 2
+
+Physical Copies:
+BOOK1003-C01
+BOOK1003-C02
 ```
 
-Each physical copy can have a status such as:
+Each physical copy can have its own status, such as:
 
 ```text
 Available
@@ -79,42 +86,44 @@ Borrowed
 Lost
 ```
 
-Book availability is determined using the number of physical copies whose status is:
-
-```text
-Available
-```
-
-This prevents incorrect availability when individual copies are borrowed, returned, or reported lost.
+This allows the system to identify exactly which physical copy has been issued, returned, or reported lost.
 
 ---
 
-## Borrowing System
+## 🔄 Book Issue and Return System
 
-When an administrator issues a book:
+### Book Issue
 
-1. The student account is validated.
-2. The student's current borrow count is checked.
-3. The student's configured borrow limit is checked.
-4. An available physical copy is selected.
-5. A transaction is created.
-6. The selected physical copy becomes `Borrowed`.
-7. Book availability is updated.
-8. Any matching `Ready` reservation is completed.
-9. The due date is calculated automatically.
-10. A borrow confirmation email can be sent to the student.
+When an Admin issues a book:
 
-The current borrowing period is configured as:
+1. The student is selected.
+2. An available book is selected.
+3. An available physical copy is assigned.
+4. A borrowing transaction is created.
+5. The physical copy status changes to `Borrowed`.
+6. Book availability is updated.
+7. The issue date and due date are recorded.
+8. A book issue confirmation email is sent to the student.
 
-```python
-BORROW_DAYS = 14
-```
+### Book Return
+
+Book returns use QR-code verification.
+
+1. Admin selects the active borrowing transaction.
+2. The QR image of the physical book copy is scanned/uploaded.
+3. The system reads the copy code.
+4. The copy code is verified against the issued physical copy.
+5. The transaction is marked as `Returned`.
+6. The physical copy becomes `Available`.
+7. Fine is calculated when applicable.
+8. Book availability is synchronized.
+9. Waiting reservations are checked.
 
 ---
 
-## QR-Based Book Return
+## 📱 QR Code Verification
 
-Each physical book copy has its own QR code.
+Every physical book copy can be associated with a unique copy code.
 
 Example:
 
@@ -122,24 +131,13 @@ Example:
 BOOK1003-C01
 ```
 
-During a return:
+The return process verifies the physical copy using its QR code before completing the return transaction.
 
-1. The administrator selects the borrowed transaction.
-2. The physical book QR image is uploaded.
-3. The QR code is decoded.
-4. The decoded copy code is compared with the expected copy.
-5. The return is accepted only when the correct physical copy is verified.
-6. The transaction status becomes `Returned`.
-7. The physical copy becomes `Available`.
-8. Any overdue fine is calculated.
-9. Book availability is synchronized.
-10. Waiting reservations for the book are processed.
-
-This ensures that the administrator returns the exact physical copy that was originally issued.
+This prevents the wrong physical copy from being returned against another borrowing transaction.
 
 ---
 
-## Reservation System
+## 📌 Reservation Management
 
 Students can reserve books when no copies are currently available.
 
@@ -153,325 +151,254 @@ Cancelled
 Expired
 ```
 
-### Reservation Flow
+When a returned book becomes available, the reservation system can process waiting reservations and update their status.
 
-```text
-Book unavailable
-      ↓
-Student reserves book
-      ↓
-Waiting
-      ↓
-A copy becomes available
-      ↓
-Ready
-      ↓
-Student receives notification
-      ↓
-Book collected
-      ↓
-Completed
-```
+Students can:
 
-If a student no longer requires the book, the reservation can be cancelled.
+- Reserve unavailable books
+- View reservation status
+- Cancel reservations
+- Receive availability notifications
+- View completed or expired reservations
 
-A ready reservation is held for a configured period:
-
-```python
-RESERVATION_HOLD_DAYS = 2
-```
-
-If the book is not collected within the hold period, the reservation can expire and the next waiting reservation can be processed.
+Admins can view and manage reservation records.
 
 ---
 
-## Lost Book Management
+## ❌ Lost Book Management
 
-An administrator can mark an actively borrowed physical copy as lost.
+An Admin can mark an actively borrowed physical copy as lost.
 
 When a book is marked as lost:
 
-- Only the selected borrowing transaction is affected.
-- The transaction status becomes `Lost`.
-- The exact physical copy becomes `Lost`.
-- The lost date is recorded.
-- The book price can be applied as the lost-book charge.
-- Other physical copies of the same title are not affected.
-
-Example:
-
-```text
-BOOK1003-C01 → Available
-BOOK1003-C02 → Lost
-
-Total Copies     : 2
-Available Copies : 1
-```
+- The transaction status changes to `Lost`
+- The exact physical copy is marked as `Lost`
+- The lost date is recorded
+- The book price can be applied as the lost-book charge
+- Availability is synchronized with the remaining physical copies
+- The lost transaction appears in lost-book records and reports
 
 ---
 
-## Fine Calculation
+## 💰 Fine Management
 
-Overdue fines are calculated according to the configured fine per day.
+The application supports fine tracking for borrowing transactions.
 
-Example configuration:
+Fine information is stored with transaction records and displayed in:
 
-```python
-FINE_PER_DAY = 5
-```
-
-If a student returns a book after its due date, the system calculates the overdue period and applicable fine.
-
-Lost books can use the book price as the replacement/lost-book charge.
+- Borrowed/returned book records
+- Student borrowing history
+- Lost-book records
+- Transaction reports
+- Report summaries
 
 ---
 
-## Email Notification System
+## 📧 Email Notification System
 
-The project supports email notifications using SMTP.
+The application includes an email notification service.
 
-Notifications can include:
+Notifications include:
 
-- Borrow confirmation email
-- Reservation-ready email
-- Due-date reminder email
-- Overdue reminder email
-- Fine information in overdue notifications
+- Book issue confirmation
+- Due-date reminders
+- Overdue reminders
+- Reservation availability notifications
 
-Example mail configuration uses:
+Book issue emails can be sent immediately during the borrowing operation.
 
-```text
-SMTP Server : smtp.gmail.com
-SMTP Port   : 587
-Security    : STARTTLS
-```
-
-Sensitive email credentials should **not** be stored directly in the source code or uploaded to GitHub.
-
-Use environment variables for credentials.
-
-Example:
-
-```env
-MAIL_USERNAME=your_email@gmail.com
-MAIL_PASSWORD=your_app_password
-```
-
----
-
-## Daily Automated Tasks
-
-The project includes:
+Scheduled notifications such as due-date and overdue reminders are handled separately through:
 
 ```text
 daily_tasks.py
 ```
 
-This script is intended to run scheduled library tasks such as:
+This allows scheduled tasks to run independently from normal browser requests.
 
-- Checking upcoming due dates
-- Sending due-date reminders
-- Checking overdue books
-- Sending overdue reminder emails
-- Processing time-dependent reservation operations
+---
 
-The Flask web server does not need to be manually opened for every scheduled email task if `daily_tasks.py` is independently scheduled by the operating system.
+## ⏰ Daily Task Automation
+
+`daily_tasks.py` is responsible for scheduled library tasks such as:
+
+- Checking books approaching their due date
+- Sending due-date reminder emails
+- Detecting overdue books
+- Sending overdue notifications
+- Processing time-dependent library operations
 
 On Windows, the script can be scheduled using **Windows Task Scheduler**.
 
+Example:
+
+```bash
+python daily_tasks.py
+```
+
+The Flask application handles the web interface, while the scheduled task script handles recurring background operations.
+
 ---
 
-## Reports Module
+## 📊 Reports
 
-The Admin Reports module provides an overview of library activity.
+The Admin Reports module provides a summary of library activity.
 
-The dashboard includes information such as:
+### Dashboard Statistics
 
-- Total students
-- Total books
-- Total physical copies
-- Available copies
-- Currently borrowed books
-- Returned books
-- Lost books
-- Active reservations
-- Total fines
+The report dashboard includes:
 
-The system also provides:
+- Total Students
+- Total Books
+- Total Physical Copies
+- Available Copies
+- Currently Borrowed Books
+- Returned Books
+- Lost Books
+- Active Reservations
+- Total Fine
 
 ### Transaction Report
 
-Contains information about:
+Contains borrowing information such as:
 
 - Transaction ID
-- Student
-- Register number
-- Book
-- Physical copy
-- Issue date
-- Due date
-- Return date
+- Register Number
+- Student Name
+- Book Code
+- Book Title
+- Copy Code
+- Issue Date
+- Due Date
+- Return Date
 - Fine
-- Transaction status
+- Status
 
 ### Reservation Report
 
-Contains information about:
+Contains:
 
 - Reservation ID
-- Student
-- Register number
-- Book
-- Reservation date
-- Ready date
-- Reservation status
-- Notification status
+- Register Number
+- Student Name
+- Book Code
+- Book Title
+- Reservation Date
+- Ready Date
+- Reservation Status
+- Notification Status
 
-Reports can be exported as **CSV files**.
+Reports can be exported to **CSV using Pandas**.
 
 ---
 
-## Technologies Used
+## 🔐 Authentication and Authorization
+
+The system provides separate login options for:
+
+### Admin
+
+Administrators can access:
+
+- Student Management
+- Book Management
+- Issue / Return
+- Reservations
+- Lost Books
+- Reports
+
+### Student
+
+Students can access:
+
+- Student Dashboard
+- Profile
+- Browse Books
+- Borrowing History
+- Reservations
+- Change Password
+
+Flask sessions are used to maintain authenticated user sessions and restrict access based on user roles.
+
+---
+
+## 🗄️ Database
+
+The application uses **SQLite** as its relational database.
+
+The database stores information related to:
+
+- Users
+- Students
+- Books
+- Physical Book Copies
+- Borrowing Transactions
+- Reservations
+
+Relationships between these records allow individual physical copies and their circulation history to be tracked.
+
+---
+
+## 🛠️ Technologies Used
 
 | Technology | Purpose |
 |---|---|
-| Python | Backend programming |
-| Flask | Web framework |
-| SQLite | Database |
-| HTML5 | Page structure |
+| Python | Core application and business logic |
+| Flask | Backend web framework and routing |
+| SQLite | Relational database |
+| HTML5 | Web page structure |
 | CSS3 | User interface styling |
-| JavaScript | Client-side functionality and QR processing |
-| Jinja2 | Flask template rendering |
-| SMTP | Email notifications |
+| Jinja2 | Dynamic HTML template rendering |
+| Pandas | Report processing and CSV export |
 | QR Code | Physical book-copy identification |
-| Pandas | Report generation / CSV processing |
+| SMTP / Email | Automated email notifications |
+| Git | Version control |
+| GitHub | Source-code hosting |
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```text
-Library-management-system/
+Student-Library-Management-System/
 │
 ├── app.py
 ├── config.py
 ├── database.py
-├── models.py
 ├── daily_tasks.py
+├── models.py
 ├── requirements.txt
-├── README.md
-├── .gitignore
 │
 ├── database/
-│   ├── schema.sql
 │   └── library.db
 │
 ├── services/
-│   ├── student_service.py
+│   ├── auth_service.py
 │   ├── book_service.py
-│   ├── transaction_service.py
-│   ├── reservation_service.py
+│   ├── lost_book_service.py
+│   ├── mail_service.py
+│   ├── remainder_service.py
 │   ├── report_service.py
-│   └── ...
+│   ├── reservation_service.py
+│   ├── student_services.py
+│   └── transaction_service.py
 │
 ├── utils/
-│   ├── validators.py
-│   ├── qr.py
-│   ├── mail.py
-│   └── ...
+│   └── qr.py
 │
 ├── Templates/
 │   ├── base.html
 │   ├── login.html
-│   ├── admin/
-│   ├── student/
-│   ├── books/
-│   ├── transactions/
-│   ├── reservations/
+│   ├── ...
 │   └── reports/
 │
-├── Static/
-│   ├── css/
-│   │   └── style.css
-│   └── qrcodes/
-│
-├── uploads/
-│
-└── reports/
-    └── csv/
+└── Static/
+    └── css/
+        └── style.css
 ```
-
-> The exact service and utility filenames may vary depending on the final project organization.
 
 ---
 
-## Database Tables
-
-The system uses SQLite and includes tables for the main library entities.
-
-### Students
-
-Stores student information such as:
-
-- Register number
-- Name
-- Department
-- Year
-- Email
-- Phone
-- Borrow limit
-- Account status
-
-### Books
-
-Stores general book information such as:
-
-- Book code
-- Title
-- Author
-- Category
-- Number of copies
-- Available copies
-- Shelf
-- Price
-
-### Book Copies
-
-Stores each physical copy separately.
-
-Important fields include:
-
-```text
-book_id
-copy_code
-status
-qrpath
-```
-
-### Transactions
-
-Stores borrowing and return history.
-
-Important fields include:
-
-```text
-student_id
-book_id
-copy_id
-issue_date
-due_date
-return_date
-fine
-status
-```
-
-### Reservations
-
-Stores student book reservations and their current status.
-
----
-
-## Installation
+## ⚙️ Installation
 
 ### 1. Clone the Repository
 
@@ -479,253 +406,75 @@ Stores student book reservations and their current status.
 git clone <repository-url>
 ```
 
-Move into the project directory:
+### 2. Navigate to the Project
 
 ```bash
 cd Library-management-system
 ```
 
----
-
-### 2. Create a Virtual Environment
-
-Windows:
+### 3. Create a Virtual Environment
 
 ```bash
 python -m venv venv
 ```
 
-Activate it:
+### 4. Activate the Virtual Environment
+
+Windows:
 
 ```bash
 venv\Scripts\activate
 ```
 
----
-
-### 3. Install Dependencies
+### 5. Install Required Packages
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
-
-### 4. Configure Environment Variables
-
-Do not store real passwords directly in `config.py`.
-
-Create a `.env` file or configure operating-system environment variables for sensitive values.
-
-Example:
-
-```env
-MAIL_USERNAME=your_email@gmail.com
-MAIL_PASSWORD=your_gmail_app_password
-SECRET_KEY=your_secret_key
-```
-
-Make sure `.env` is included in `.gitignore`.
-
----
-
-### 5. Initialize the Database
-
-Ensure the SQLite schema is available in:
-
-```text
-database/schema.sql
-```
-
-Initialize the database using the initialization method provided by the application.
-
-The application database is stored locally as:
-
-```text
-database/library.db
-```
-
-For a public GitHub repository, the working database should normally be excluded from version control and recreated from `schema.sql`.
-
----
-
-### 6. Run the Flask Application
+### 6. Run the Application
 
 ```bash
 python app.py
 ```
 
-The development server normally starts at:
-
-```text
-http://127.0.0.1:5000
-```
-
-Open the address in a web browser.
+Open the local Flask address displayed in the terminal.
 
 ---
 
-## Login System
+## 🔒 Important Security Note
 
-The application provides separate login options for:
+Do not commit sensitive information such as:
 
-### Administrator
+- Email passwords
+- SMTP credentials
+- Flask secret keys
+- Environment variables
+- Production database files
 
-Administrators can access management modules including:
-
-```text
-Student Management
-Book Management
-Issue / Return
-Reservations
-Lost Books
-Reports
-```
-
-### Student
-
-Students can access:
-
-```text
-My Information
-My Borrowed Books
-Browse Books
-My Reservations
-My Profile
-Change Password
-```
-
-Authentication is session-based, and protected routes verify the logged-in user's role before allowing access.
+Keep sensitive configuration outside the public GitHub repository and load it securely through environment variables or an appropriate configuration mechanism.
 
 ---
 
-## Book Status Workflow
-
-A normal book-copy lifecycle is:
-
-```text
-Available
-   ↓
-Borrowed
-   ↓
-Returned
-   ↓
-Available
-```
-
-For a lost book:
-
-```text
-Available
-   ↓
-Borrowed
-   ↓
-Lost
-```
-
-The transaction history and physical-copy status are maintained separately.
-
-For example, after returning a book:
-
-```text
-Transaction status : Returned
-Copy status        : Available
-```
-
-This allows the transaction to remain permanently in the student's borrowing history while making the physical copy available for another student.
-
----
-
-## Reservation and Return Integration
-
-When a physical copy is returned:
-
-```text
-Borrowed Copy
-      ↓
-Return verified
-      ↓
-Copy becomes Available
-      ↓
-Availability synchronized
-      ↓
-Waiting reservations checked
-      ↓
-Next eligible reservation becomes Ready
-      ↓
-Student notification sent
-```
-
-This connects the transaction, inventory, reservation, and email modules.
-
----
-
-## Security Notes
-
-Before deploying or publishing this project:
-
-- Never commit email passwords.
-- Never commit Gmail App Passwords.
-- Keep `.env` files out of Git.
-- Use environment variables for secrets.
-- Use a strong Flask `SECRET_KEY`.
-- Do not publish a production database containing real student information.
-- Disable Flask debug mode in production.
-- Validate all user input.
-- Restrict Admin routes to authenticated Admin accounts.
-
-If a password or API credential was accidentally committed to Git, revoke/rotate it immediately.
-
----
-
-## Future Enhancements
+## 🔮 Future Enhancements
 
 Possible future improvements include:
 
-- Live camera-based QR scanning
-- PDF report generation
-- Advanced report filters
+- Cloud deployment
+- REST API
+- Camera-based live QR scanning
+- Advanced report filtering
+- Analytics and charts
 - Fine payment tracking
-- Student notification dashboard
-- Book categories and advanced filtering
-- Reservation queue visualization
-- Admin analytics charts
-- Cloud database support
-- Deployment to a production server
-- Automated backups
-- Responsive mobile UI improvements
+- Student borrowing analytics
+- ISBN-based book information
+- Pagination for large datasets
+- Enhanced email templates
 
 ---
 
-## Purpose of the Project
+## 👨‍💻 Project Category
 
-This project demonstrates practical implementation of:
+**Python Full-Stack Web Development Project**
 
-- Python web development
-- Flask routing
-- Role-based authentication
-- Session management
-- SQLite database operations
-- Relational database design
-- CRUD operations
-- Physical inventory management
-- Transaction processing
-- QR-code integration
-- Reservation queue management
-- Email automation
-- Fine calculation
-- Scheduled background tasks
-- Report generation
-- Responsive web interface design
-
----
-
-## Author
-
-Developed as a **Student Library Management System** project using Python and Flask.
-
----
-
-## License
-
-This project is intended for educational and academic purposes.
+Built using Flask with database management, role-based authentication, QR-code processing, automated email notifications, scheduled tasks, and reporting.
