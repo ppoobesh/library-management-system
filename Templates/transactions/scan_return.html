@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Return Book{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Return Book</h2>
+        <p>Verify the physical book copy by scanning its QR code.</p>
+    </div>
+    <a href="{{ url_for('borrowed_books') }}" class="btn btn-secondary">Back to Borrowed Books</a>
+</div>
+
+<div class="details-card">
+    <h3>Book Details</h3>
+    <div class="details-grid">
+        <div class="detail-item">
+            <span class="detail-label">Student</span>
+            <span class="detail-value">{{ transaction["name"] }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Register Number</span>
+            <span class="detail-value">{{ transaction["roll_no"] }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Book Code</span>
+            <span class="detail-value">{{ transaction["bookcode"] }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Book Title</span>
+            <span class="detail-value">{{ transaction["title"] }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Copy Code</span>
+            <span class="detail-value">{{ transaction["copy_code"] }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Due Date</span>
+            <span class="detail-value">{{ transaction["due_date"] }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="form-card">
+    <h3>Upload Book QR Code</h3>
+    <p class="form-help" style="margin-bottom: 1.5rem;">Upload the QR image printed for this exact physical book copy.</p>
+
+    <form action="{{ url_for('return_book_qr') }}" method="POST" id="qr-return-form">
+        <input type="hidden" name="transaction_id" value="{{ transaction['id'] }}">
+        <input type="hidden" id="copy_code" name="copy_code">
+
+        <div class="form-group">
+            <label for="qr-image">QR Code Image</label>
+            <input type="file" id="qr-image" accept="image/png,image/jpeg,image/jpg" required>
+            <small class="form-help">Expected copy: <strong>{{ transaction["copy_code"] }}</strong></small>
+        </div>
+
+        <div id="scan-status" class="scan-status">Please upload a QR code image.</div>
+
+        <div class="form-actions">
+            <button type="submit" id="return-button" class="btn btn-success" disabled>Return Book</button>
+            <a href="{{ url_for('borrowed_books') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<div class="action-row">
+    <a href="{{ url_for('borrowed_books') }}" class="btn btn-secondary">Back to Borrowed Books</a>
+    <a href="{{ url_for('issue_return_module') }}" class="btn btn-secondary">Back to Issue / Return</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+    const qrInput = document.getElementById("qr-image");
+    const copyCodeInput = document.getElementById("copy_code");
+    const scanStatus = document.getElementById("scan-status");
+    const returnButton = document.getElementById("return-button");
+    const expectedCopyCode = "{{ transaction['copy_code'] }}".trim().toUpperCase();
+
+    qrInput.addEventListener("change", function(event) {
+        const file = event.target.files[0];
+        copyCodeInput.value = "";
+        returnButton.disabled = true;
+
+        if (!file) {
+            scanStatus.textContent = "Please upload a QR code image.";
+            return;
+        }
+
+        scanStatus.textContent = "Reading QR code...";
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+            const image = new Image();
+            image.onload = function() {
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d", { willReadFrequently: true });
+
+                canvas.width = image.naturalWidth;
+                canvas.height = image.naturalHeight;
+                context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
+
+                if (!qrCode) {
+                    scanStatus.textContent = "Unable to read the QR code. Please upload a clear QR image.";
+                    return;
+                }
+
+                const scannedCopyCode = qrCode.data.trim().toUpperCase();
+
+                if (scannedCopyCode !== expectedCopyCode) {
+                    scanStatus.textContent = `Incorrect QR code. Expected ${expectedCopyCode}, but scanned ${scannedCopyCode}.`;
+                    return;
+                }
+
+                copyCodeInput.value = scannedCopyCode;
+                scanStatus.textContent = "QR verified successfully: " + scannedCopyCode;
+                returnButton.disabled = false;
+            };
+
+            image.onerror = function() {
+                scanStatus.textContent = "Unable to load the selected image.";
+            };
+            image.src = event.target.result;
+        };
+
+        reader.onerror = function() {
+            scanStatus.textContent = "Unable to read the selected file.";
+        };
+        reader.readAsDataURL(file);
+    });
+
+    document.getElementById("qr-return-form").addEventListener("submit", function(event) {
+        if (copyCodeInput.value.trim() === "") {
+            event.preventDefault();
+            scanStatus.textContent = "Please verify the correct book QR code before returning.";
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Login | Student Library Management System{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="page-header login-heading">
+        <div>
+            <h2>Welcome to the Library</h2>
+            <p>Select your account type and sign in to continue.</p>
+        </div>
+    </div>
+
+    <div class="login-options">
+        <div class="login-card">
+            <div class="login-icon">🛡️</div>
+            <h2>Admin Login</h2>
+            <p class="login-description">Access student management, books, issue/return, reservations and reports.</p>
+
+            <form method="POST" action="{{ url_for('login') }}">
+                <input type="hidden" name="login_type" value="Admin">
+
+                <div class="form-group">
+                    <label for="admin_username">Username</label>
+                    <input type="text" id="admin_username" name="username" placeholder="Enter admin username" autocomplete="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="admin_password">Password</label>
+                    <input type="password" id="admin_password" name="password" placeholder="Enter admin password" autocomplete="current-password" required>
+                </div>
+
+                <button type="submit" class="btn login-btn">Login as Admin</button>
+            </form>
+        </div>
+
+        <div class="login-card">
+            <div class="login-icon">🎓</div>
+            <h2>Student Login</h2>
+            <p class="login-description">Browse books, view borrowed books, manage reservations and your profile.</p>
+
+            <form method="POST" action="{{ url_for('login') }}">
+                <input type="hidden" name="login_type" value="Student">
+
+                <div class="form-group">
+                    <label for="student_username">Register Number</label>
+                    <input type="text" id="student_username" name="username" placeholder="Enter register number" autocomplete="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="student_password">Password</label>
+                    <input type="password" id="student_password" name="password" placeholder="Enter password" autocomplete="current-password" required>
+                </div>
+
+                <button type="submit" class="btn btn-success login-btn">Login as Student</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Add Student{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Add Student</h2>
+        <p>Create a new student account for the Library Management System.</p>
+    </div>
+    <a href="{{ url_for('view_students') }}" class="btn btn-secondary">Back to Students</a>
+</div>
+
+<div class="form-card">
+    <form action="{{ url_for('add_student_route') }}" method="POST">
+        <div class="form-group">
+            <label for="roll_no">Register Number</label>
+            <input type="text" id="roll_no" name="roll_no" placeholder="Example: 23CS101" autocomplete="off" required>
+            <small class="form-help">Enter the unique register number assigned to the student.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Student Name</label>
+            <input type="text" id="name" name="name" placeholder="Enter student name" autocomplete="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="department">Department</label>
+            <input type="text" id="department" name="department" placeholder="Example: CSE" required>
+        </div>
+
+        <div class="form-group">
+            <label for="year">Year</label>
+            <select id="year" name="year" required>
+                <option value="">-- Select Year --</option>
+                <option value="1">I</option>
+                <option value="2">II</option>
+                <option value="3">III</option>
+                <option value="4">IV</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="student@example.com" autocomplete="email" required>
+            <small class="form-help">Library notifications will be sent to this email address.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" placeholder="Enter 10-digit phone number" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" autocomplete="tel" required>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">Add Student</button>
+            <a href="{{ url_for('view_students') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<div class="action-row">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+{% endblock %}

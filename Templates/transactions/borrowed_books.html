@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Borrowed Books{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Borrowed Books</h2>
+        <p>View currently borrowed books, return books using QR code, and mark books as lost.</p>
+    </div>
+    <a href="{{ url_for('issue_return_module') }}" class="btn btn-secondary">Back to Issue / Return</a>
+</div>
+
+{% set active_transactions = transactions | selectattr("status", "equalto", "Borrowed") | list %}
+{% set returned_transactions = transactions | selectattr("status", "equalto", "Returned") | list %}
+
+<div class="section-header">
+    <h3>Currently Borrowed</h3>
+    <p>Books that are currently issued to students.</p>
+</div>
+
+{% if active_transactions %}
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Register Number</th>
+                <th>Book Code</th>
+                <th>Book Title</th>
+                <th>Copy Code</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Fine</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in active_transactions %}
+            <tr>
+                <td>{{ transaction["name"] }}</td>
+                <td><strong>{{ transaction["roll_no"] }}</strong></td>
+                <td>{{ transaction["bookcode"] }}</td>
+                <td>{{ transaction["title"] }}</td>
+                <td>{{ transaction["copy_code"] }}</td>
+                <td>{{ transaction["issue_date"] }}</td>
+                <td>{{ transaction["due_date"] }}</td>
+                <td>₹{{ "%.2f"|format(transaction["fine"] or 0) }}</td>
+                <td><span class="status status-borrowed">Borrowed</span></td>
+                <td>
+                    <div class="table-actions">
+                        <a href="{{ url_for('scan_return', transaction_id=transaction['id']) }}" class="btn btn-small">Scan QR to Return</a>
+                        <form method="POST" action="{{ url_for('mark_book_lost', transaction_id=transaction['id']) }}" class="inline-form">
+                            <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('Are you sure you want to mark this book as lost?');">Mark as Lost</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>No Borrowed Books</h3>
+    <p>No books are currently borrowed.</p>
+</div>
+{% endif %}
+
+<div class="section-header">
+    <h3>Returned Books</h3>
+    <p>Completed book return records.</p>
+</div>
+
+{% if returned_transactions %}
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Register Number</th>
+                <th>Book Code</th>
+                <th>Book Title</th>
+                <th>Copy Code</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Return Date</th>
+                <th>Fine</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in returned_transactions %}
+            <tr>
+                <td>{{ transaction["name"] }}</td>
+                <td><strong>{{ transaction["roll_no"] }}</strong></td>
+                <td>{{ transaction["bookcode"] }}</td>
+                <td>{{ transaction["title"] }}</td>
+                <td>{{ transaction["copy_code"] }}</td>
+                <td>{{ transaction["issue_date"] }}</td>
+                <td>{{ transaction["due_date"] }}</td>
+                <td>{{ transaction["return_date"] or "-" }}</td>
+                <td>₹{{ "%.2f"|format(transaction["fine"] or 0) }}</td>
+                <td><span class="status status-returned">Returned</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>No Return Records</h3>
+    <p>There are currently no returned book records.</p>
+</div>
+{% endif %}
+
+<div class="action-row">
+    <a href="{{ url_for('borrow_book_route') }}" class="btn btn-success">Borrow Book</a>
+    <a href="{{ url_for('lost_books') }}" class="btn">View Lost Books</a>
+    <a href="{{ url_for('issue_return_module') }}" class="btn btn-secondary">Back to Issue / Return</a>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+{% endblock %}

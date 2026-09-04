@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>My Profile</h2>
+        <p>View your student account and library membership information.</p>
+    </div>
+    <a href="{{ url_for('student_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+<div class="profile-card">
+    <div class="profile-header">
+        <div class="profile-avatar">{{ student.name[0]|upper }}</div>
+        <div>
+            <h3>{{ student.name }}</h3>
+            <p>{{ student.roll_no }}</p>
+        </div>
+    </div>
+
+    <div class="profile-details">
+        <div class="profile-item">
+            <span class="profile-label">Register Number</span>
+            <span class="profile-value">{{ student.roll_no }}</span>
+        </div>
+
+        <div class="profile-item">
+            <span class="profile-label">Student Name</span>
+            <span class="profile-value">{{ student.name }}</span>
+        </div>
+
+        <div class="profile-item">
+            <span class="profile-label">Department</span>
+            <span class="profile-value">{{ student.department }}</span>
+        </div>
+
+        <div class="profile-item">
+            <span class="profile-label">Year</span>
+            <span class="profile-value">{{ student.year }}</span>
+        </div>
+
+        <div class="profile-item">
+            <span class="profile-label">Email Address</span>
+            <span class="profile-value">{{ student.email }}</span>
+        </div>
+
+        <div class="profile-item">
+            <span class="profile-label">Phone Number</span>
+            <span class="profile-value">{{ student.phone }}</span>
+        </div>
+
+        <div class="profile-item">
+            <span class="profile-label">Account Status</span>
+            <span class="profile-value">
+                {% if student.status == "Active" %}
+                    <span class="status status-active">Active</span>
+                {% else %}
+                    <span class="status status-inactive">{{ student.status }}</span>
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="profile-item">
+            <span class="profile-label">Borrow Limit</span>
+            <span class="profile-value">{{ student.borrow_limit }} book(s)</span>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a href="{{ url_for('change_password_route') }}" class="btn">Change Password</a>
+        <a href="{{ url_for('student_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

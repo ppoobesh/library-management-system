@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Borrow Book{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Borrow Book</h2>
+        <p>Select a student and an available book to issue a physical copy.</p>
+    </div>
+    <a href="{{ url_for('issue_return_module') }}" class="btn btn-secondary">Back to Issue / Return</a>
+</div>
+
+<div class="form-card">
+    <form action="{{ url_for('borrow_book_route') }}" method="POST">
+        <div class="form-group">
+            <label for="student_id">Student</label>
+            <select id="student_id" name="student_id" required>
+                <option value="">-- Select Student --</option>
+                {% for student in students %}
+                    <option value="{{ student['id'] }}">{{ student['roll_no'] }} - {{ student['name'] }}</option>
+                {% endfor %}
+            </select>
+            <small class="form-help">Only active students are shown.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="book_id">Book</label>
+            <select id="book_id" name="book_id" required>
+                <option value="">-- Select Book --</option>
+                {% for book in books %}
+                    <option value="{{ book['id'] }}">{{ book['bookcode'] }} - {{ book['title'] }} ({{ book['available'] }} available)</option>
+                {% endfor %}
+            </select>
+            <small class="form-help">Only books with an available physical copy are shown.</small>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">Borrow Book</button>
+            <a href="{{ url_for('issue_return_module') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<div class="action-row">
+    <a href="{{ url_for('borrowed_books') }}" class="btn">View Borrowed Books</a>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+{% endblock %}

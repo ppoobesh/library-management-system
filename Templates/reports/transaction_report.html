@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Transaction Report{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Transaction Report</h2>
+        <p>View complete borrowing, return and lost-book history.</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('export_transaction_report') }}" class="btn btn-success">Download CSV</a>
+        <a href="{{ url_for('reports_dashboard') }}" class="btn btn-secondary">Back to Reports</a>
+    </div>
+</div>
+
+{% if transactions %}
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Transaction ID</th>
+                <th>Register Number</th>
+                <th>Student</th>
+                <th>Book Code</th>
+                <th>Book Title</th>
+                <th>Copy Code</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Return / Lost Date</th>
+                <th>Fine</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction["transaction_id"] }}</td>
+                <td><strong>{{ transaction["roll_no"] }}</strong></td>
+                <td>{{ transaction["name"] }}</td>
+                <td>{{ transaction["bookcode"] }}</td>
+                <td>{{ transaction["title"] }}</td>
+                <td>{{ transaction["copy_code"] }}</td>
+                <td>{{ transaction["issue_date"] }}</td>
+                <td>{{ transaction["due_date"] }}</td>
+                <td>{{ transaction["return_date"] or "-" }}</td>
+                <td>₹{{ "%.2f"|format(transaction["fine"] or 0) }}</td>
+                <td>
+                    {% if transaction["status"] == "Borrowed" %}
+                        <span class="status status-borrowed">Borrowed</span>
+                    {% elif transaction["status"] == "Returned" %}
+                        <span class="status status-returned">Returned</span>
+                    {% elif transaction["status"] == "Lost" %}
+                        <span class="status status-lost">Lost</span>
+                    {% else %}
+                        <span class="status">{{ transaction["status"] }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>No Transaction Records</h3>
+    <p>There are currently no transaction records available.</p>
+</div>
+{% endif %}
+
+<div class="action-row">
+    <a href="{{ url_for('reports_dashboard') }}" class="btn btn-secondary">Back to Reports</a>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+{% endblock %}

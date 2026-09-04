@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}My Borrowed Books{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>My Borrowed Books</h2>
+        <p>View your currently borrowed books, due dates, returned books, lost books and fine details.</p>
+    </div>
+    <a href="{{ url_for('student_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+{% set active_books = transactions | selectattr("status", "equalto", "Borrowed") | list %}
+{% set history_books = transactions | selectattr("status", "in", ["Returned", "Lost"]) | list %}
+
+<div class="section-header">
+    <h3>Currently Borrowed</h3>
+    <p>Books currently issued to your account.</p>
+</div>
+
+{% if active_books %}
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Book Code</th>
+                <th>Book Title</th>
+                <th>Copy Code</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in active_books %}
+            <tr>
+                <td><strong>{{ transaction["bookcode"] }}</strong></td>
+                <td>{{ transaction["title"] }}</td>
+                <td>{{ transaction["copy_code"] }}</td>
+                <td>{{ transaction["issue_date"] }}</td>
+                <td>{{ transaction["due_date"] }}</td>
+                <td>
+                    <span class="status status-borrowed">{{ transaction["status"] }}</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>No Currently Borrowed Books</h3>
+    <p>You do not currently have any books issued to your account.</p>
+</div>
+{% endif %}
+
+<div class="section-header">
+    <h3>Borrowing History</h3>
+    <p>Returned and lost-book records are shown below.</p>
+</div>
+
+{% if history_books %}
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Book Code</th>
+                <th>Book Title</th>
+                <th>Copy Code</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Return / Lost Date</th>
+                <th>Fine</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in history_books %}
+            <tr>
+                <td><strong>{{ transaction["bookcode"] }}</strong></td>
+                <td>{{ transaction["title"] }}</td>
+                <td>{{ transaction["copy_code"] }}</td>
+                <td>{{ transaction["issue_date"] }}</td>
+                <td>{{ transaction["due_date"] }}</td>
+                <td>{{ transaction["return_date"] or "-" }}</td>
+                <td>₹{{ "%.2f"|format(transaction["fine"] or 0) }}</td>
+                <td>
+                    {% if transaction["status"] == "Returned" %}
+                        <span class="status status-returned">Returned</span>
+                    {% elif transaction["status"] == "Lost" %}
+                        <span class="status status-lost">Lost</span>
+                    {% else %}
+                        <span class="status">{{ transaction["status"] }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>No Borrowing History</h3>
+    <p>You do not have any returned or lost-book records yet.</p>
+</div>
+{% endif %}
+
+<div class="action-row">
+    <a href="{{ url_for('student_books') }}" class="btn">Browse Books</a>
+    <a href="{{ url_for('student_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+{% endblock %}

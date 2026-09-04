@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Environment variables / secrets
+.env
+
+# Database
+database/library.db
+*.db
+
+# Generated QR codes
+static/qrcodes/*.png
+
+uploads/qr_uploads
+
+# Generated reports
+reports/csv/*.csv
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+test.py
+config.py
+config.txt

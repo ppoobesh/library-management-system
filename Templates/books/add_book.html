@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Add Book{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Add Book</h2>
+        <p>Add a new book and automatically create its physical copies and QR codes.</p>
+    </div>
+    <a href="{{ url_for('view_books') }}" class="btn btn-secondary">Back to Books</a>
+</div>
+
+<div class="form-card">
+    <form action="{{ url_for('add_book_route') }}" method="POST">
+        <div class="form-group">
+            <label for="bookcode">Book Code</label>
+            <input type="text" id="bookcode" name="bookcode" value="{{ book.bookcode if book else '' }}" placeholder="Example: BOOK1001" autocomplete="off" required>
+            <small class="form-help">Book code must be unique.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="title">Book Title</label>
+            <input type="text" id="title" name="title" value="{{ book.title if book else '' }}" placeholder="Enter book title" required>
+        </div>
+
+        <div class="form-group">
+            <label for="author">Author</label>
+            <input type="text" id="author" name="author" value="{{ book.author if book else '' }}" placeholder="Enter author name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category</label>
+            <input type="text" id="category" name="category" value="{{ book.category if book else '' }}" placeholder="Example: Programming" required>
+        </div>
+
+        <div class="form-group">
+            <label for="copies">Number of Copies</label>
+            <input type="number" id="copies" name="copies" value="{{ book.copies if book else '' }}" min="1" required>
+            <small class="form-help">A physical copy and QR code will be created for each copy.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="shelf">Shelf Location</label>
+            <input type="text" id="shelf" name="shelf" value="{{ book.shelf if book else '' }}" placeholder="Example: A-12" required>
+        </div>
+
+        <div class="form-group">
+            <label for="price">Book Price</label>
+            <input type="number" id="price" name="price" value="{{ book.price if book else '' }}" min="0" step="0.01" placeholder="Example: 750" required>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">Add Book</button>
+            <a href="{{ url_for('view_books') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<div class="action-row">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+{% endblock %}

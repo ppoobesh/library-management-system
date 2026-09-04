@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Reservation Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Reservation Management</h2>
+        <p>View and manage student book reservations.</p>
+    </div>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+{% if reservations %}
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Register No</th>
+                <th>Book Code</th>
+                <th>Book Title</th>
+                <th>Reservation Date</th>
+                <th>Status</th>
+                <th>Notification</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reservation in reservations %}
+            <tr>
+                <td>{{ reservation["name"] }}</td>
+                <td><strong>{{ reservation["roll_no"] }}</strong></td>
+                <td>{{ reservation["bookcode"] }}</td>
+                <td>{{ reservation["title"] }}</td>
+                <td>{{ reservation["reservation_date"] }}</td>
+                <td>
+                    {% if reservation["status"] == "Waiting" %}
+                        <span class="status status-waiting">Waiting</span>
+                    {% elif reservation["status"] == "Ready" %}
+                        <span class="status status-ready">Ready</span>
+                    {% elif reservation["status"] == "Completed" %}
+                        <span class="status status-completed">Completed</span>
+                    {% elif reservation["status"] == "Cancelled" %}
+                        <span class="status status-cancelled">Cancelled</span>
+                    {% elif reservation["status"] == "Expired" %}
+                        <span class="status status-expired">Expired</span>
+                    {% else %}
+                        <span class="status">{{ reservation["status"] }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if reservation["notification_sent"] == 1 %}
+                        <span class="notification-sent">Email Sent</span>
+                    {% else %}
+                        <span class="notification-pending">Not Sent</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>No Reservations</h3>
+    <p>There are currently no book reservations.</p>
+</div>
+{% endif %}
+
+<div class="action-row">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+{% endblock %}

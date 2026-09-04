@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Student Library Management System{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <h1>Student Library Management System</h1>
+        {% if session.get("user_id") and request.endpoint != "login" %}
+            <div class="header-user">
+                <span>{{ session.get("username") }}</span>
+                <span class="role-badge">{{ session.get("role") }}</span>
+            </div>
+        {% endif %}
+    </div>
+</header>
+
+<main class="container">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-container">
+                {% for message in messages %}
+                    <div class="flash-message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}
+    {% endblock %}
+</main>
+
+<footer>
+    <p>&copy; 2026 Student Library Management System</p>
+</footer>
+
+</body>
+</html>
